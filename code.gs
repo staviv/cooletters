@@ -17,6 +17,7 @@ var dictionaryF = { "Z" :"𝖅" ,"Y" :"𝖄" ,"X" :"𝖃" ,"W" :"𝖂" ,"V" :"�
 
 
 
+
 const dictionary = [dictionaryD, dictionaryB, dictionaryBF, dictionarySF, dictionaryS, dictionary1, dictionaryF];
 
 function covertext(msg) {
