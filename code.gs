@@ -21,11 +21,50 @@ var dictionaryF = { "Z" :"𝖅" ,"Y" :"𝖄" ,"X" :"𝖃" ,"W" :"𝖂" ,"V" :"�
 const dictionary = [dictionaryD, dictionaryB, dictionaryBF, dictionarySF, dictionaryS, dictionary1, dictionaryF];
 
 function covertext(msg) {
-    const result=[];
-    for (let i in dictionary)
-    result[i] = msg.replace(/[a-z]/gi, m => dictionary[i][m]);
-    return(result);
+  const result=[];
+  for (let i in dictionary)
+  result[i] = msg.replace(/[a-z]/gi, m => dictionary[i][m]);
+  return(result);
 }
+
+
+function postData(payload){
+  var data = {
+    method: 'post',
+    "payload": payload,
+  };
+
+  // bot's token
+  UrlFetchApp.fetch(
+    'https://api.telegram.org/bot' + token_bot + '/',
+    data
+  );
+}
+
+
+function sendMessage(chatId, text){
+  var payload = {
+    method: 'sendMessage',
+    chat_id: String(chatId),
+    text: text,
+    parse_mode: 'HTML',
+  };
+  postData(payload);
+}
+
+
+function answerInlineQuery(id, answer){
+  var payload = {
+    method: 'answerInlineQuery',
+    inline_query_id: String(id),
+    results: JSON.stringify(answer),
+    parse_mode: 'HTML',
+  };
+  
+  postData(payload);
+}
+
+
 function doPost(e) {
   var update = JSON.parse(e.postData.contents);
   // Make sure this is update is a type message
@@ -34,26 +73,23 @@ function doPost(e) {
     var chatId = msg.chat.id;
     var tosend = covertext(msg.text);
     for (let i in tosend){
-      var payload = {
-        method: 'sendMessage',
-        chat_id: String(msg.chat.id),
-        text: tosend[i],
-        parse_mode: 'HTML',
-      };
-
-      var data = {
-        method: 'post',
-        payload: payload,
-      };
-
-      // bot's token
-      UrlFetchApp.fetch(
-        'https://api.telegram.org/bot' + token_bot + '/',
-        data
-      );
+      sendMessage(chatId, tosend[i]);
     }
+    //sendMessage(chatId, String(chatId));
+  }
+  else if(update.hasOwnProperty('inline_query')){
+    strArr = covertext(update.inline_query.query);
+    answer=[];
+    for (i in strArr)answer[i] = {type:"article", id:i, title: strArr[i], input_message_content:{message_text:strArr[i]}};
+    answerInlineQuery(update.inline_query.id, answer);
+  }
+  else{
+    for(p in update)
+    sendMessage(986383258, p);
   }
 }
+
+
 
 function setWebhook() {
   var response =  UrlFetchApp.fetch(url + "/setWebhook?url=" + webAppUrl);
